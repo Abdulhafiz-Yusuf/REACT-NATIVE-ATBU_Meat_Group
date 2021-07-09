@@ -1,0 +1,85 @@
+React Navigation#
+The community solution to navigation is a standalone library that allows developers to set up the screens of an app with a few lines of code.
+
+Installation and setup#
+First, you need to install them in your project:
+
+npm install @react-navigation/native @react-navigation/stack
+
+
+*****Debug APK*****
+
+What can I use it for?
+A debug .apk file will allow you to install and test your app before publishing to app stores. Mind you, this is not yet ready for publishing, and there are quite a few things you’ll need to do to before you can publish. Nevertheless, it’ll be useful for initial distribution and testing.
+You’ll need to enable debugging options on your phone to run this apk.
+Prerequisite:
+react-native version > 0.58
+
+
+****How to generate one in 3 steps?****
+Step 1: Go to the root of the project in the terminal and run the below command:
+
+
+react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res
+
+Step 2: Go to android directory:
+cd android
+
+Step 3: Now in this android folder, run this command
+
+
+
+
+There! you’ll find the apk file in the following path:
+yourProject/android/app/build/outputs/apk/debug/app-debug.apk
+
+
+
+Step 1. Generate a keystore
+You will need a Java generated signing key which is a keystore file used to generate a React Native executable binary for Android. You can create one using the keytool in the terminal with the following command
+
+keytool -genkey -v -keystore mykey.keystore -alias mykey0 -keyalg RSA -keysize 2048 -validity 10000
+
+
+Step 2. Adding Keystore to your project
+
+Firstly, you need to copy the file your_key_name.keystore and paste it under the android/app directory in your React Native project folder.
+
+You need to open your android\app\build.gradle file and add the keystore configuration. There are two ways of configuring the project with keystore. First, the common and unsecured way:
+
+
+android {
+....
+  signingConfigs {
+    release {
+      storeFile file('your_key_name.keystore')
+      storePassword 'your_key_store_password'
+      keyAlias 'your_key_alias'
+      keyPassword 'your_key_file_alias_password'
+    }
+  }
+  buildTypes {
+    release {
+      ....
+      signingConfig signingConfigs.release
+    }
+  }
+}
+
+
+
+Step 3. Release APK Generation
+Place your terminal directory to android using:
+cd android
+
+
+For Windows,
+gradlew assembleRelease
+
+
+For Linux and Mac OSX:
+./gradlew assembleRelease
+
+
+
+As a result, the APK creation process is done. You can find the generated APK at android/app/build/outputs/apk/app-release.apk. This is the actual app, which you can send to your phone or upload to the Google Play Store. Congratulations, you’ve just generated a React Native Release Build APK for Android.
