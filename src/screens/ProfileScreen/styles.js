@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 export default StyleSheet.create({
     container: {
         flex: 1,
-        alignItems: 'start',
+        alignItems: 'flex-start',
         paddingLeft: 30
     },
     title: {
@@ -13,7 +13,6 @@ export default StyleSheet.create({
         flex: 1,
         height: 50,
         width: 50,
-        JustifySelf: 'center',
         alignSelf: "center",
         margin: 40
     },
@@ -27,7 +26,7 @@ export default StyleSheet.create({
     label: {
         fontSize: 16,
         paddingLeft: 15,
-        paddingRIght: 15,
+        paddingRight: 15,
 
     },
     btncontainer: {
@@ -50,7 +49,7 @@ export default StyleSheet.create({
         height: 50,
         flex: 1,
         flexDirection: 'row',
-        alignItems: 'start',
+        alignItems: 'flex-start',
         marginRight: 20,
         marginLeft: 20
 

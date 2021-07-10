@@ -26,6 +26,7 @@ export default function LoginScreen({ navigation }) {
             setLoading(true)
             setError('')
             //login() from ContextAPI Action
+            setError('')
             login(dispatch, email, password, setError, setLoading, navigation)
         }
     }

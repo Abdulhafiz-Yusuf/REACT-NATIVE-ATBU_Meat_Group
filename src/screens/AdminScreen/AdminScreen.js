@@ -1,13 +1,14 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { SafeAreaView, StatusBar, StyleSheet } from "react-native";
+import { SafeAreaView, StatusBar, BackHandler, StyleSheet, FlatList } from "react-native";
 import LoadScreen from '../../components/LoadScreen';
 import Card from './AdminCard'
-import CartList from './CartList';
+import { useFocusEffect } from '@react-navigation/native';
+
 import SearchBarComponent from './SearchBarComponent';
 import { userStore } from '../../AppStore/UserStore';
 import { fectchAllOrderData, fetchQueryData } from '../../AppStore/actions/UserActions'
 import { db } from '../../firebase/FirebaseConfig'
-
+import { View } from 'react-native';
 
 
 
@@ -22,6 +23,8 @@ export default function CartScreen({ navigation }) {
   const [searchText, setSearchText] = useState('');
   const [radioValue, setRadioValue] = useState('');
 
+
+
   useEffect(() => {
     fectchAllOrderData(dispatch);
     const willFocusSubscription = navigation.addListener('focus', () => {
@@ -30,6 +33,23 @@ export default function CartScreen({ navigation }) {
 
     return willFocusSubscription;
   }, [])
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Home' }],
+        })
+      }
+
+      BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+      return () =>
+        BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+    }, [])
+  );
+
 
   const orderDataRef = db.collection('order');
 
@@ -82,11 +102,7 @@ export default function CartScreen({ navigation }) {
   const [selectedId, setSelectedId] = useState(null);
 
   return (
-
-
-
-    <SafeAreaView style={styles.container}>
-
+    <View style={styles.container}>
       <SearchBarComponent
         onSearchPress={onSearchPress}
         searchText={searchText}
@@ -95,31 +111,35 @@ export default function CartScreen({ navigation }) {
         setRadioValue={setRadioValue}
         loading={loading}
       />
-
       {
         !orderData ?
-          <LoadScreen /> :
+          <LoadScreen />
+          :
           orderData.length !== 0 ?
-            <CartList
-              selectedId={selectedId}
-              orderData={orderData}
-              renderItem={renderItem} />
+            <FlatList
+              style={styles.item}
+              keyExtractor={(item, index) => index}
+              extraData={selectedId}
+              data={orderData}
+              renderItem={renderItem}
+            />
             :
             <LoadScreen />
+
       }
-    </SafeAreaView>
+
+    </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginTop: StatusBar.currentHeight || 0,
+
   },
   item: {
-    padding: 20,
-    marginVertical: 8,
-    marginHorizontal: 16,
+
   },
   title: {
     fontSize: 16,

@@ -10,13 +10,11 @@ import UserContextProvider from './src/AppStore/UserStore'
 const Stack = createStackNavigator();
 
 export default function App() {
-
-
   return (
     <PaperProvider>
       <UserContextProvider>
         <NavigationContainer>
-          <Stack.Navigator initialRouteName='Home'
+          <Stack.Navigator initialRouteName='Ordering'
             screenOptions={{            // headerStyle: {            //   backgroundColor: 'papayawhip', justifyContent            // },
               title: 'ATBU Meat Group'
             }} >

@@ -125,8 +125,19 @@ export const login = (dispatch, email, password, setError, setLoading, navigatio
                         type: 'GET_CURRENT_USER',
                         payload: user
                     })
-                    if (user.fullName === 'admin') { navigation.navigate('Admin') }
-                    else { navigation.navigate('Ordering') }
+                    if (user.fullName === 'admin') {
+                        navigation.reset({
+                            index: 1,
+                            routes: [{ name: 'Home' }, { name: 'Admin' }],
+                        })
+
+                    }
+                    else {
+                        navigation.reset({
+                            index: 1,
+                            routes: [{ name: 'Home' }, { name: 'Ordering' }],
+                        })
+                    }
                 })
                 .catch(error => {
                     setError('Login Failed. Please try again.')
@@ -161,7 +172,7 @@ export const singUp = (dispatch, fullName, email, password, staffId, dept, phone
                         type: 'GET_CURRENT_USER',
                         payload: data
                     })
-                    navigation.navigate('Ordering')
+                    navigation.reset({ index: 1, routes: [{ name: 'Home' }, { name: 'Ordering' }], })
                 })
                 .catch((error) => {
                     setError('Login Failed. Please try again.')
@@ -179,7 +190,7 @@ export const singUp = (dispatch, fullName, email, password, staffId, dept, phone
 
 
 export const fetchAPIforOrderScreen = (dispatch, user, setCost, setTotalInCart) => {
-
+    const costRef = db.collection("cost").doc("cost");
     let tempDataHolder = [];
     //fetch cost/kg
     costRef.get().then((doc) => {

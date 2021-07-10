@@ -5,6 +5,20 @@ import { StyleSheet, ActivityIndicator, View, Text } from "react-native";
 
 const SearchBarComponent = ({ onSearchPress, searchText, radioValue, setSearchText, setRadioValue, loading }) => {
 
+    // var sites = {
+    //     links: [
+    //         { href: "ibro" },
+    //         { href: "habib" },
+    //         { href: 'https://www.example.com/v1/contact-us/us' },
+    //         { href: 'https://www.example.com/v1/dontcontact-us/us' }
+    //     ]
+    // };
+    // const regex = new RegExp(`/${searchQuery}/b`, 'g');
+    // const matchedSites = sites.links.filter(({ href }) => href.match(regex));
+    //setMatchedWidowData(matchedArray)
+
+    // const [Loading, setLoading] = React.useState(loading)
+
     const onChangeSearch = query => {
         setSearchText(query)
         console.log(searchText)
@@ -67,11 +81,9 @@ export default SearchBarComponent;
 
 const styles = StyleSheet.create({
     SearchBarContainer: {
-        marginTop: 10,
         height: 140,
-        justifyContent: 'flex-start',
-        paddingRight: 10,
-        paddingLeft: 10,
+        justifyContent: 'flex-start'
+
     },
     SearchButton: {
         marginTop: 10,

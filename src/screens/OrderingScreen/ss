@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react'
-import { Image, Text, TouchableOpacity, BackHandler, View } from 'react-native'
+import { Image, Text, TouchableOpacity, View } from 'react-native'
 import styles from './styles';
 import { Icon, withBadge } from 'react-native-elements'
 import { QuantityData, MonthData, CollectionPointData, } from './Data'
@@ -9,7 +9,6 @@ import 'react-native-get-random-values'
 import { nanoid } from 'nanoid'
 import { userStore } from '../../AppStore/UserStore';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { useFocusEffect } from '@react-navigation/native';
 
 import { addToCart, fetchAPIforOrderScreen } from '../../AppStore/actions/UserActions'
 
@@ -19,7 +18,11 @@ export default function OrderingScreen(props) {
     const { state, dispatch } = useContext(userStore)
     const user = state.user
     // console.log(state)
-
+    // const user = {
+    //     email: "yushaf01@gmail.com",
+    //     fullName: "Abdulhafiz Yusuf",
+    //     id: "dobTvCESHOTYQHZIeQfgh7lQVyi1"
+    // }
     const [Quantity, setQuantity] = useState(1)
     const [Month, setMonth] = useState('January')
     const [CollectionPoint, setCollectionPoint] = useState('ATBU Farm')
@@ -39,21 +42,7 @@ export default function OrderingScreen(props) {
             routes: [{ name: 'Home' }],
         })
     }
-    useFocusEffect(
-        React.useCallback(() => {
-            const onBackPress = () => {
-                props.navigation.reset({
-                    index: 0,
-                    routes: [{ name: 'Home' }],
-                })
-            }
 
-            BackHandler.addEventListener('hardwareBackPress', onBackPress);
-
-            return () =>
-                BackHandler.removeEventListener('hardwareBackPress', onBackPress);
-        }, [])
-    );
     useEffect(() => {
         fetchAPIforOrderScreen(dispatch, user, setCost, setTotalInCart)
         const willFocusSubscription = props.navigation.addListener('focus', () => {
@@ -71,7 +60,7 @@ export default function OrderingScreen(props) {
             qty: Quantity,
             month: Month,
             cpoint: CollectionPoint,
-            cost: Math.round(parseInt(Quantity) * cost),
+            cost: Math.round((Quantity * cost)),
             pstatus: 'pending'
             //  date: timestamp,
         };
@@ -107,7 +96,7 @@ export default function OrderingScreen(props) {
 
 
     return (
-        <View style={{ flex: 1, flexDirection: 'column' }}>
+        <View style={{ flex: 1 }}>
 
             {
                 // !cost || totalInCart === null ?
@@ -130,10 +119,13 @@ export default function OrderingScreen(props) {
                         <View>
 
 
-                            <View style={{ flex: 1, flexDirection: 'row', width: '95%', marginBottom: 10, marginTop: 10 }}>
-                                <Text style={{ fontWeight: 'bold', flex: 1, fontSize: 16, marginLeft: 35 }}>Quantity (Kilogram)</Text>
-                                <View style={{ flex: 1, flexDirection: 'row' }}>
+                            <View style={styles.inputContainer}>
+                                <Text style={styles.label}>Quantity</Text>
+                                <View style={{ flex: 2, flexDirection: 'row' }}>
                                     <Picker
+                                        placeholder='Quantity'
+                                        mode='dropdown'
+
                                         style={{
                                             color: '#000',
                                             fontSize: 16,
@@ -151,19 +143,14 @@ export default function OrderingScreen(props) {
                                             )
                                         })}
                                     </Picker>
-
+                                    <Text style={styles.labelKG}>KG</Text>
                                 </View>
 
                             </View>
-                            <View style={{ marginBottom: 10, marginTop: 10, flex: 1, flexDirection: 'row', width: '95%' }}>
-                                <Text style={{ fontWeight: 'bold', flex: 1, fontSize: 16, marginLeft: 35 }}>Month</Text>
+                            <View style={styles.inputContainer}>
+                                <Text style={styles.label}>Month</Text>
                                 <Picker
-                                    style={{
-                                        color: '#000',
-                                        fontSize: 16,
-                                        lineHeight: 23,
-                                        flex: 1
-                                    }}
+                                    style={styles.input}
                                     selectedValue={Month}
                                     onValueChange={(itemValue, itemIndex) =>
                                         setMonth(itemValue)
@@ -175,34 +162,30 @@ export default function OrderingScreen(props) {
                                     })}
                                 </Picker>
                             </View>
+                            <View style={styles.inputContainer}>
+                                <Text style={styles.label}>Collection Point</Text>
 
-
-                            <View style={{ marginBottom: 10, marginTop: 10, flex: 1, flexDirection: 'row', width: '95%' }}>
-                                <Text style={{ fontWeight: 'bold', flex: 1, fontSize: 16, marginLeft: 35 }}>Collection Point</Text>
-                                <Picker
-                                    style={{
-                                        color: '#000',
-                                        fontSize: 16,
-                                        lineHeight: 23,
-                                        flex: 1
-                                    }}
-                                    selectedValue={CollectionPoint}
-                                    onValueChange={(itemValue, itemIndex) =>
-                                        setCollectionPoint(itemValue)
-                                    }>
-                                    {CollectionPointData.map((collPoint, index) => {
-                                        return (
-                                            <Picker.Item key={index} label={collPoint} value={collPoint} />
-                                        )
-                                    })}
-                                </Picker>
-
-                            </View>
-                            <View style={{ flex: 1, flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'flex-end' }}>
-                                <Text style={{ width: '45%', fontSize: 14, fontWeight: 'bold', }}>ATBU Farm (Free)</Text>
-                                <Text style={{ width: '45%', fontSize: 14, fontWeight: 'bold' }}>Delivery (N100)</Text>
+                                <View style={{ flex: 2 }}>
+                                    <Picker
+                                        style={styles.input}
+                                        selectedValue={CollectionPoint}
+                                        onValueChange={(itemValue, itemIndex) =>
+                                            setCollectionPoint(itemValue)
+                                        }>
+                                        {CollectionPointData.map((collPoint, index) => {
+                                            return (
+                                                <Picker.Item key={index} label={collPoint} value={collPoint} />
+                                            )
+                                        })}
+                                    </Picker>
+                                    <Text style={styles.labelKG}>ATBU Farm (Free)</Text>
+                                    <Text style={styles.labelKG}>Delivery (N100)</Text>
+                                </View>
                             </View>
                         </View>
+
+
+
                         <Text style={styles.errorText}>
                             {error}
                         </Text>

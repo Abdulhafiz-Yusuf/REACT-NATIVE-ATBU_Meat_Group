@@ -3,7 +3,8 @@ import { StyleSheet } from 'react-native';
 export default StyleSheet.create({
     container: {
         flex: 1,
-        // alignItems: 'center',
+        borderWidth: 1,
+        alignItems: 'center',
     },
     title: {
 
@@ -30,16 +31,18 @@ export default StyleSheet.create({
     label: {
         fontSize: 16,
         paddingLeft: 15,
-        paddingRIght: 15,
-        flex: 1
+        paddingRight: 15,
+        flex: 1,
+        marginLeft: 5
     },
     labelKG: {
         fontSize: 16,
     },
     iconContainer: {
+        justifyContent: 'flex-end',
         flexDirection: 'row',
         justifyContent: 'space-between',
-        justifySelf: 'end'
+        marginTop: 50,
 
     },
     btncontainer: {
@@ -52,7 +55,7 @@ export default StyleSheet.create({
         backgroundColor: '#788eec',
         marginLeft: 30,
         marginRight: 30,
-        marginTop: 20,
+        marginTop: 10,
         width: 100,
         height: 50,
         borderRadius: 5,
@@ -63,8 +66,8 @@ export default StyleSheet.create({
         height: 50,
         flex: 1,
         flexDirection: 'row',
-        alignItems: 'start',
-        margin: 15,
+        alignItems: 'flex-start',
+        marginBottom: 10,
         marginRight: 30,
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
@@ -113,7 +116,7 @@ export default StyleSheet.create({
         fontSize: 16,
         textAlign: 'center',
         fontStyle: 'italic',
-        margin: 2
+        margin: 1
     }
 
 

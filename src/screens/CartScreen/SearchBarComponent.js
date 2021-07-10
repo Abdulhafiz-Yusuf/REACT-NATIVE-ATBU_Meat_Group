@@ -40,28 +40,33 @@ const SearchBarComponent = ({ onSearchPress, searchText, radioValue, setSearchTe
     }
     return (
         <View style={styles.SearchBarContainer}>
-            <Searchbar
-                placeholder="Search by order ID"
-                onChangeText={onChangeSearch}
-                value={searchText}
-            />
+            <View>
+                <Searchbar
+                    placeholder="Search by order ID"
+                    onChangeText={onChangeSearch}
+                    value={searchText}
+                />
+            </View>
 
-            <RadioButton.Group
-                onValueChange={newValue => setRadioValue(newValue)}
-                value={radioValue}
-            >
-                <View style={styles.radioContainer}>
-                    <View style={styles.radioStyle}>
+            <RadioButton.Group onValueChange={newValue => {
+                setRadioValue(newValue)
+
+
+            }
+            } value={radioValue}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
                         <RadioButton value="pending" />
-                        <Text>Pending Order</Text>
+                        <Text>Pending  Order</Text>
+
                     </View>
-                    <View style={styles.radioStyle}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
                         <RadioButton value="paid" />
                         <Text>Paid Order</Text>
                     </View>
                 </View>
-            </RadioButton.Group>
 
+            </RadioButton.Group>
 
 
             {renderButton()}
@@ -76,23 +81,23 @@ export default SearchBarComponent;
 
 const styles = StyleSheet.create({
     SearchBarContainer: {
-        margin: 4,
+        marginTop: 10,
+        height: 140,
+        justifyContent: 'flex-start',
+        paddingRight: 10,
+        paddingLeft: 10,
+
     },
     SearchButton: {
-        flex: 1,
-        margin: 1,
+        marginTop: 10,
         fontSize: 16,
         fontWeight: 'bold',
     },
     radioContainer: {
-        flex: 1,
-        flexDirection: 'row',
+
     },
     radioStyle: {
-        flex: 1,
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center'
+
     }
 
 });

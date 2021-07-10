@@ -192,15 +192,6 @@ android {
     }
 }
 
-// dependencies {
-  
-// android {
-//     defaultConfig {
-       
-//     }
-// }
-
-
 dependencies {
     implementation 'com.android.support:multidex:1.0.3' //enter the latest version
 

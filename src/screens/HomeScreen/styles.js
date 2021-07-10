@@ -4,7 +4,6 @@ export default StyleSheet.create({
     btncontainer: {
         flexDirection: 'row',
         justifyContent: 'center',
-        justifySelf: 'end'
     },
     container: {
         flex: 1,
@@ -27,7 +26,6 @@ export default StyleSheet.create({
         borderRadius: 5,
         alignItems: "center",
         justifyContent: 'center',
-        justifySelf: 'end'
     },
     buttonTitle: {
         color: 'white',

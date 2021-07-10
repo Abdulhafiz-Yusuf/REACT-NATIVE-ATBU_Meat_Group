@@ -41,7 +41,6 @@ const styles = StyleSheet.create({
     actionBtn:
     {
         flex: 1,
-        alignItems: 'space-between',
         borderWidth: 1
     },
     contentHeader: {

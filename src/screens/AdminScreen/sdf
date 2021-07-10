@@ -1,22 +1,21 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { SafeAreaView, View, StatusBar, StyleSheet, FlatList } from "react-native";
-import { db } from '../../firebase/FirebaseConfig'
+import { SafeAreaView, StatusBar, StyleSheet } from "react-native";
 import LoadScreen from '../../components/LoadScreen';
-import Card from './Card'
+import Card from './AdminCard'
 import CartList from './CartList';
 import SearchBarComponent from './SearchBarComponent';
 import { userStore } from '../../AppStore/UserStore';
-import { fectchCurrentUserOrderData, fetchQueryData } from '../../AppStore/actions/UserActions'
+import { fectchAllOrderData, fetchQueryData } from '../../AppStore/actions/UserActions'
+import { db } from '../../firebase/FirebaseConfig'
+import { View } from 'react-native';
+
+
+
 
 export default function CartScreen({ navigation }) {
   // const user = props.route.params.user
   const { state, dispatch } = useContext(userStore)
-  const user = state.user
-  // const user = {
-  //   email: "yushaf01@gmail.com",
-  //   fullName: "Abdulhafiz Yusuf",
-  //   id: "dobTvCESHOTYQHZIeQfgh7lQVyi1"
-  // }
+
   const orderData = state.orderData
 
   const [loading, setLoading] = useState(false)
@@ -25,26 +24,23 @@ export default function CartScreen({ navigation }) {
   const [radioValue, setRadioValue] = useState('');
 
   useEffect(() => {
-    fectchCurrentUserOrderData(dispatch, user, navigation);
+    fectchAllOrderData(dispatch);
     const willFocusSubscription = navigation.addListener('focus', () => {
-      fectchCurrentUserOrderData(dispatch, user, navigation);
+      fectchAllOrderData(dispatch);
     });
 
     return willFocusSubscription;
   }, [])
 
-
-
   const orderDataRef = db.collection('order');
-
 
   const onSearchPress = () => {
 
-    const QuerypendingStatusAndText = orderDataRef.where("pstatus", "==", "pending").where("oid", "==", searchText).where('user', '==', user.id)
-    const QuerypaidStatusAndText = orderDataRef.where("pstatus", "==", "paid").where("oid", "==", searchText).where('user', '==', user.id)
-    const QueryOnlyPendingStatus = orderDataRef.where("pstatus", "==", "pending").where('user', '==', user.id)
-    const QueryOnlyPaidStatus = orderDataRef.where("pstatus", "==", "paid").where('user', '==', user.id)
-    const QueryOnlySearchText = orderDataRef.where("oid", "==", searchText).where('user', '==', user.id)
+    const QuerypendingStatusAndText = orderDataRef.where("pstatus", "==", "pending").where("oid", "==", searchText)
+    const QuerypaidStatusAndText = orderDataRef.where("pstatus", "==", "paid").where("oid", "==", searchText)
+    const QueryOnlyPendingStatus = orderDataRef.where("pstatus", "==", "pending")
+    const QueryOnlyPaidStatus = orderDataRef.where("pstatus", "==", "paid")
+    const QueryOnlySearchText = orderDataRef.where("oid", "==", searchText)
 
     if (radioValue === 'pending' & searchText !== '') {
       //firestore with pstatus===pending & oid === searchText (NB oid === order ID)
@@ -73,11 +69,11 @@ export default function CartScreen({ navigation }) {
     }
   }
 
-  console.log(state)
+
 
   const renderItem = ({ item, index }) => {
     return (
-      < Card data={item} index={index} navigation={navigation} />
+      < Card data={item} index={index} />
     )
   }
 
@@ -86,7 +82,7 @@ export default function CartScreen({ navigation }) {
 
   const [selectedId, setSelectedId] = useState(null);
 
-  return (
+ return (
     <View style={styles.container}>
       <SearchBarComponent
         onSearchPress={onSearchPress}
@@ -124,8 +120,9 @@ const styles = StyleSheet.create({
 
   },
   item: {
-
-
+    padding: 20,
+    marginVertical: 8,
+    marginHorizontal: 16,
   },
   title: {
     fontSize: 16,
