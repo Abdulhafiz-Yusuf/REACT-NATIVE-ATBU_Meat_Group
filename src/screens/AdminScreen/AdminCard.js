@@ -24,14 +24,24 @@ export default function AdminCard({ data, index }) {
             <DisapprovalDialog visible={DisapprovalVisible} onDismiss={onDisappDismiss} index={index} data={data} />
 
             <Card style={{ margin: 0 }} >
-                <View style={{ flexDirection: 'row', paddingRight: 10, }} >
-                    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-                        <Avatar.Image style={{ margin: 5 }} size={120} source={require('../../../asset/beef.jpeg')} />
-                        <Text style={styles.price}>NGN{data.cost}</Text>
+                <View style={{ flexDirection: 'row', paddingRight: 10, paddingLeft: 10 }} >
+
+
+                    <View style={{ flex: 1, marginRight: 5, alignItems: 'center', justifyContent: 'center', padding: 10 }}>
+                        <Avatar.Image style={{ margin: 5 }} size={120}
+                            source={
+                                data.item.ItemName === 'Division' ? require('../../../asset/beef.jpeg') :
+                                    data.item.ItemName === 'Head' ? require('../../../asset/head.jpeg') :
+                                        data.item.ItemName === 'Tail' ? require('../../../asset/cowtail.jpeg') :
+                                            data.item.ItemName === 'Leg' && require('../../../asset/cowleg.jpeg')}
+
+
+                        />
+                        <Text style={styles.price}>NGN{data.totalPrice}</Text>
                     </View>
 
-                    <View style={{ flexDirection: 'row', }}>
-                        <View style={{ alignContent: 'center' }}>
+                    <View style={{ flexDirection: 'row', flex: 1 }}>
+                        <View style={{ alignContent: 'center', flex: 1 }}>
                             <ListItem
                                 style={styles.listItem}
                                 title={data.oid}
@@ -39,7 +49,7 @@ export default function AdminCard({ data, index }) {
                             />
                             <ListItem
                                 style={styles.listItem}
-                                title={qty}
+                                title={data.item.qty}
                                 description='Quanity'
                             />
 
@@ -52,14 +62,14 @@ export default function AdminCard({ data, index }) {
                         </View>
                     </View>
 
-                    <View style={{ justifyContent: 'space-around', alignContent: 'center' }}>
+                    <View style={{ flex: 1, justifyContent: 'space-around', alignContent: 'center' }}>
                         <PaymentActionComponent paymentStatus={data.pstatus} showPApprovalDialog={showPApprovalDialog} showDisapproveDialog={showDisapproveDialog} />
                     </View>
                 </View>
             </Card >
 
             <Divider />
-        </View>
+        </View >
 
 
     )

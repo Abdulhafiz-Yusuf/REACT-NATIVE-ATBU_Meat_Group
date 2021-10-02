@@ -12,6 +12,8 @@ target 'ATBU_Meat_Group' do
     :hermes_enabled => false
   )
 
+  pod 'RNVectorIcons', :path => '../node_modules/react-native-vector-icons'
+
   target 'ATBU_Meat_GroupTests' do
     inherit! :complete
     # Pods for testing

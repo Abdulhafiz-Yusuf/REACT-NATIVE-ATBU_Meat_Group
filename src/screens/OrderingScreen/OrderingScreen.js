@@ -1,44 +1,56 @@
+
 import React, { useState, useEffect, useContext } from 'react'
 import { Image, Text, TouchableOpacity, BackHandler, View } from 'react-native'
 import styles from './styles';
 import { Icon, withBadge } from 'react-native-elements'
-import { QuantityData, MonthData, CollectionPointData, } from './Data'
-import { Picker } from '@react-native-picker/picker'
+
 import LoadScreen from '../../components/LoadScreen';
 import 'react-native-get-random-values'
 import { nanoid } from 'nanoid'
 import { userStore } from '../../AppStore/UserStore';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { useFocusEffect } from '@react-navigation/native';
+import { addToCart, addToCartorUpdateCart, fetchAPIforOrderScreen, Logout } from '../../AppStore/actions/UserActions'
+import firebase from '../../firebase/FirebaseConfig';
 
-import { addToCart, fetchAPIforOrderScreen } from '../../AppStore/actions/UserActions'
+import OrderCard from '../../components/OrderCard'
+
+
 
 
 export default function OrderingScreen(props) {
-
+    const [index, setIndex] = useState()
     const { state, dispatch } = useContext(userStore)
-    const user = state.user
-    // console.log(state)
+    let user = props.route.params.user
+
+    const [tempOrderQty, settempOrderQty] = useState()
 
     const [Quantity, setQuantity] = useState(1)
     const [Month, setMonth] = useState('January')
     const [CollectionPoint, setCollectionPoint] = useState('ATBU Farm')
     const [Loading, setLoading] = useState(false)
     const [error, setError] = useState()
-    const [cost, setCost] = useState()
 
     const [totalInCart, setTotalInCart] = useState()
-
+    const [AllinStock, setAllinStock] = useState([])
 
     const onGotoScreen = (screen) => {
         props.navigation.navigate(screen)
     };
-    const onGotoHome = () => {
-        props.navigation.reset({
-            index: 0,
-            routes: [{ name: 'Home' }],
-        })
+
+
+    const onLogout = () => {
+        firebase.auth().signOut().then(() => {
+            dispatch({
+                type: 'LOGOUT',
+            })
+
+        }).catch((error) => {
+            // An error happened.
+        });
     }
+
+
     useFocusEffect(
         React.useCallback(() => {
             const onBackPress = () => {
@@ -47,41 +59,50 @@ export default function OrderingScreen(props) {
                     routes: [{ name: 'Home' }],
                 })
             }
-
             BackHandler.addEventListener('hardwareBackPress', onBackPress);
-
             return () =>
                 BackHandler.removeEventListener('hardwareBackPress', onBackPress);
         }, [])
     );
+
     useEffect(() => {
-        fetchAPIforOrderScreen(dispatch, user, setCost, setTotalInCart)
+        fetchAPIforOrderScreen(dispatch, user, setTotalInCart, setAllinStock)
+
         const willFocusSubscription = props.navigation.addListener('focus', () => {
-            fetchAPIforOrderScreen(dispatch, user, setCost, setTotalInCart)
+            fetchAPIforOrderScreen(dispatch, user, setTotalInCart, setAllinStock)
         });
+
         return willFocusSubscription;
+
     }, [])
 
-    const onAddtoCartPress = () => {
+    const onAddtoCartPress = (item, totalPrice, index) => {
         setLoading(true)
         //const timestamp = Firebase.firestore.FieldValue.serverTimestamp();
-        const data = {
-            user: user.id,
-            oid: nanoid(5),
-            qty: Quantity,
-            month: Month,
-            cpoint: CollectionPoint,
-            cost: Math.round(parseInt(Quantity) * cost),
-            pstatus: 'pending'
-            //  date: timestamp,
-        };
-        addToCart(dispatch, data, setLoading, setError, props)
-    }
+        if (tempOrderQty[index].counter > item.itemQty) {
+            alert('You can not order more than available quantity in stock')
+        }
+        else {
+            const data = {
+                user: user.id,
+                oid: nanoid(5),
+                item: item,
+                collectionPoint: 'ATBU Farm',
+                totalPrice: Math.round(parseInt(tempOrderQty[index].counter) * parseInt(item.itemAmount)),
+                orderQty: tempOrderQty[index].counter,
+                pstatus: 'pending'
+            };
+            addToCartorUpdateCart(props, dispatch, user, item, tempOrderQty, index, setLoading, data)
 
+        }
+
+    }
     const renderButton = () => {
+
         if (Loading) {
             return <LoadScreen size='small' text={'Adding to cart...'} />
         }
+
         if (!Loading) {
             return (
                 <View style={styles.btncontainer} >
@@ -110,133 +131,68 @@ export default function OrderingScreen(props) {
         <View style={{ flex: 1, flexDirection: 'column' }}>
 
             {
-                // !cost || totalInCart === null ?
-                //     <LoadScreen />
-                //     :
-                <View style={styles.container}>
-                    <KeyboardAwareScrollView
-                        style={{ flex: 1, width: '100%' }}
-                        keyboardShouldPersistTaps="always">
-                        <Image
-                            style={styles.logo}
-                            source={require('../../../asset/logo.jpg')}
-                        />
+                totalInCart === null ?
+                    <LoadScreen />
+                    :
+                    <View style={styles.container}>
+                        <KeyboardAwareScrollView
+                            style={{ flex: 1, width: '100%' }}
+                            keyboardShouldPersistTaps="always">
+                            {/* <Image
+                                style={styles.logo}
+                                source={require('../../../asset/logo.jpg')}
+                            /> */}
 
-                        <View style={styles.userContainer}>
-                            <Text style={styles.userName}>Hi! {user.fullName}</Text>
-                            <Text style={styles.userInstruction}> Please fill in all field below to place and order</Text>
-                        </View>
-
-                        <View>
-
-
-                            <View style={{ flex: 1, flexDirection: 'row', width: '95%', marginBottom: 10, marginTop: 10 }}>
-                                <Text style={{ fontWeight: 'bold', flex: 1, fontSize: 16, marginLeft: 35 }}>Quantity (Kilogram)</Text>
-                                <View style={{ flex: 1, flexDirection: 'row' }}>
-                                    <Picker
-                                        style={{
-                                            color: '#000',
-                                            fontSize: 16,
-                                            lineHeight: 23,
-                                            flex: 1
-                                        }}
-                                        selectedValue={Quantity}
-                                        onValueChange={(itemValue, itemIndex) => {
-
-                                            setQuantity(itemValue)
-                                        }}>
-                                        {QuantityData.map((quantity, index) => {
-                                            return (
-                                                <Picker.Item key={index} label={quantity} value={quantity} />
-                                            )
-                                        })}
-                                    </Picker>
-
-                                </View>
-
-                            </View>
-                            <View style={{ marginBottom: 10, marginTop: 10, flex: 1, flexDirection: 'row', width: '95%' }}>
-                                <Text style={{ fontWeight: 'bold', flex: 1, fontSize: 16, marginLeft: 35 }}>Month</Text>
-                                <Picker
-                                    style={{
-                                        color: '#000',
-                                        fontSize: 16,
-                                        lineHeight: 23,
-                                        flex: 1
-                                    }}
-                                    selectedValue={Month}
-                                    onValueChange={(itemValue, itemIndex) =>
-                                        setMonth(itemValue)
-                                    }>
-                                    {MonthData.map((month, index) => {
-                                        return (
-                                            <Picker.Item key={index} label={month} value={month} />
-                                        )
-                                    })}
-                                </Picker>
+                            <View style={styles.userContainer}>
+                                {/* <Text style={styles.userName}>Hi! {user.fullName}</Text> */}
+                                <Text style={styles.userInstruction}> Please fill in all field below to place and order</Text>
                             </View>
 
+                            <View>
 
-                            <View style={{ marginBottom: 10, marginTop: 10, flex: 1, flexDirection: 'row', width: '95%' }}>
-                                <Text style={{ fontWeight: 'bold', flex: 1, fontSize: 16, marginLeft: 35 }}>Collection Point</Text>
-                                <Picker
-                                    style={{
-                                        color: '#000',
-                                        fontSize: 16,
-                                        lineHeight: 23,
-                                        flex: 1
-                                    }}
-                                    selectedValue={CollectionPoint}
-                                    onValueChange={(itemValue, itemIndex) =>
-                                        setCollectionPoint(itemValue)
-                                    }>
-                                    {CollectionPointData.map((collPoint, index) => {
-                                        return (
-                                            <Picker.Item key={index} label={collPoint} value={collPoint} />
-                                        )
-                                    })}
-                                </Picker>
+                                <OrderCard
+                                    btnActionHandler={(item, totalPrice, index) => onAddtoCartPress(item, totalPrice, index)}
+                                    page='user'
+                                    setTempCounterValue={settempOrderQty}
+                                    AllinStock={AllinStock}
+                                />
+
 
                             </View>
-                            <View style={{ flex: 1, flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'flex-end' }}>
-                                <Text style={{ width: '45%', fontSize: 14, fontWeight: 'bold', }}>ATBU Farm (Free)</Text>
-                                <Text style={{ width: '45%', fontSize: 14, fontWeight: 'bold' }}>Delivery (N100)</Text>
-                            </View>
-                        </View>
-                        <Text style={styles.errorText}>
-                            {error}
-                        </Text>
+                            <Text style={styles.errorText}>
+                                {error}
+                            </Text>
 
 
-                        {renderButton()}
+                            {renderButton()}
 
-                        <View style={styles.iconContainer} >
-                            <Icon
-                                raised
-                                name='user'
-                                type='font-awesome'
-                                onPress={() => onGotoScreen('Profile')}
-                            />
+                            <View style={styles.iconContainer} >
+                                <Icon
+                                    raised
+                                    name='user'
+                                    type='font-awesome'
+                                    onPress={() => onGotoScreen('Profile')}
+                                />
 
 
-                            < BadgedIcon
-                                raised
-                                name='shopping-cart'
-                                type='font-awesome'
-                                onPress={() => onGotoScreen('Cart')}
-                            />
+                                < BadgedIcon
+                                    raised
+                                    name='shopping-cart'
+                                    type='font-awesome'
+                                    onPress={() => onGotoScreen('Cart')}
+                                />
 
-                            <Icon
-                                raised
-                                name='logout'
-                                type='material-design'
-                                onPress={() => onGotoHome()}
-                            />
+                                <Icon
+                                    raised
+                                    name='logout'
+                                    type='material-design'
+                                    onPress={onLogout}
+                                />
 
-                        </ View>
+                            </ View>
 
-                    </KeyboardAwareScrollView>
-                </View >
+                        </KeyboardAwareScrollView>
+                    </View >
 
             }
 

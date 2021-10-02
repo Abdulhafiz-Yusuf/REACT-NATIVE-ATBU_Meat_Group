@@ -24,6 +24,8 @@ export default function CartScreen({ navigation }) {
   const [searchText, setSearchText] = useState('');
   const [radioValue, setRadioValue] = useState('');
 
+
+
   useEffect(() => {
     fectchCurrentUserOrderData(dispatch, user, navigation);
     const willFocusSubscription = navigation.addListener('focus', () => {
@@ -48,7 +50,7 @@ export default function CartScreen({ navigation }) {
 
     if (radioValue === 'pending' & searchText !== '') {
       //firestore with pstatus===pending & oid === searchText (NB oid === order ID)
-      fetchQueryData(dispatch, QuerypendingStatusAndText);
+      fetchQueryData(dispatch, QuerypendingStatusAndText, setLoading);
       console.log('pending and Text')
 
     }
@@ -73,7 +75,7 @@ export default function CartScreen({ navigation }) {
     }
   }
 
-  console.log(state)
+
 
   const renderItem = ({ item, index }) => {
     return (

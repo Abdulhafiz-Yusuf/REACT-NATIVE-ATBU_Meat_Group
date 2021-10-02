@@ -2,11 +2,12 @@ import firebase, { db } from '../../firebase/FirebaseConfig'
 
 //Firestore Refs
 const orderDataRef = db.collection('order');
+const stockDataRef = db.collection('stock');
 const costRef = db.collection("cost").doc("cost");
 const usersRef = db.collection('users')
 
 //ACTIONS
-export const fectchAllOrderData = (dispatch) => {
+export const fectchAllOrderData = (dispatch, navigaton) => {
 
     let tempDataHolder = [];
 
@@ -29,6 +30,8 @@ export const fectchAllOrderData = (dispatch) => {
                     type: 'FETCH_ORDER_DATA',
                     payload: []
                 })
+
+                navigation.navigate('Home')
             }
             else {
                 alert('Error occur, ensure you Turn ON your internet connection.')
@@ -64,7 +67,10 @@ export const fectchCurrentUserOrderData = (dispatch, user, navigation) => {
                     type: 'FETCH_ORDER_DATA',
                     payload: tempDataHolder
                 })
-                navigation.navigate('Ordering')
+                // setLoading(false)
+                navigation.navigate('Home')
+
+
             }
         }).catch(err =>
             console.log(err)
@@ -152,7 +158,29 @@ export const login = (dispatch, email, password, setError, setLoading, navigatio
             console.log(error)
         })
 }
+export const Logout = () => {
+    firebase.auth().signOut()
+    dispatch({
+        type: 'LOGOUT',
+    })
 
+}
+
+export const PasswordResetAction = (email, setError, setLoading, navigation) => {
+    firebase.auth().sendPasswordResetEmail(email).then(() => {
+        setLoading(false)
+        alert('Password reset mail is sent to ' + email)
+        navigation.navigate('Login')
+    })
+        .catch((error) => {
+            const errorCode = error.code;
+            setLoading(false)
+            setError(error.message)
+
+        });
+
+
+}
 export const singUp = (dispatch, fullName, email, password, staffId, dept, phone, navigation, setError, setLoading) => {
     setError('')
     firebase.auth().createUserWithEmailAndPassword(email, password)
@@ -188,26 +216,15 @@ export const singUp = (dispatch, fullName, email, password, staffId, dept, phone
         });
 }
 
-
-export const fetchAPIforOrderScreen = (dispatch, user, setCost, setTotalInCart) => {
-    const costRef = db.collection("cost").doc("cost");
+export const fetchAPIforOrderScreen = (dispatch, user, setTotalInCart, setAllinStock) => {
+    // const costRef = db.collection("cost").doc("cost");
     let tempDataHolder = [];
-    //fetch cost/kg
-    costRef.get().then((doc) => {
-        if (doc.exists) {
-            console.log("Document data:", doc.data());
-            setCost(doc.data().cost)
-        } else {
-            // doc.data() will be undefined in this case
-            console.log("No such document!");
-        }
-    }).catch((error) => {
-        alert('Please check your internet connection')
-        onGotoHome()
-        console.log("Error getting document:", error);
-    });
+    let tempStockDataHolder = [];
+    //     // firebase.auth().signOut().then(() => {
+    //     //     dispatch({
+    //     //         type: 'LOGOUT',
+    //     //     })
 
-    //fetch all orderdata for we need total number of cart for current user
     orderDataRef.where("user", "==", user.id).get()
         .then((querySnapshot) => {
             if (querySnapshot.docs.length !== 0) {
@@ -222,25 +239,196 @@ export const fetchAPIforOrderScreen = (dispatch, user, setCost, setTotalInCart) 
                 console.log('No Data')
                 setTotalInCart(0)
             }
+
         }).catch(err =>
             console.log(err)
         )
+
+
+    stockDataRef.get()
+
+        .then((querySnapshot) => {
+            if (querySnapshot.docs.length !== 0) {
+                querySnapshot.forEach((doc) => {
+                    // doc.data() is never undefined for query doc snapshots
+                    // console.log(doc.id, " => ", doc.data());
+                    tempStockDataHolder = tempStockDataHolder.concat(doc.data())
+                    setAllinStock(tempStockDataHolder)
+                })
+            }
+        })
+
 }
 
-export const addToCart = (dispatch, data, setLoading, setError, props) => {
+// export const addToCart = (dispatch, data, setLoading, setError, props) => {
+//     console.log(data)
+//     orderDataRef.add(data)
+//         .then(() => {
+//             alert('Successful! Thanks')
+//             setLoading(false)
+//             props.navigation.navigate('Cart')
 
+//         })
+//         .catch((err) => {
+//             setError(err.message)
+//             setLoading(false)
+//             console.log(err)
+//         })
+
+// }
+
+
+export const stockCowAction = (dispatch, data, setLoading, setError, props) => {
     console.log(data)
-    orderDataRef.add(data)
+    stockDataRef.add(data)
         .then(() => {
             alert('Successful! Thanks')
             setLoading(false)
             props.navigation.navigate('Cart')
-
+            dispatch(
+                {
+                    type: 'REFRESH'
+                }
+            )
         })
         .catch((err) => {
             setError(err.message)
             setLoading(false)
             console.log(err)
         })
+}
+
+export const fetchStock = (dispatch, setStockItem) => {
+    let tempDataHolder = [];
+    //fetch all stock data 
+    stockDataRef.get()
+        .then((querySnapshot) => {
+            if (querySnapshot.docs.length !== 0) {
+                querySnapshot.forEach((doc) => {
+                    // doc.data() is never undefined for query doc snapshots
+                    // console.log(doc.id, " => ", doc.data());
+                    tempDataHolder = tempDataHolder.concat(doc.data())
+                    setStockItem(tempDataHolder)
+                })
+            }
+            else {
+                console.log('No Data')
+                setTotalInCart(0)
+            }
+        }).catch(err =>
+            console.log(err)
+        )
+
+}
+
+
+
+
+export const addToCartorUpdateCart = (props, dispatch, user, item, tempStockQty, index, setLoading, data) => {
+    console.log(item)
+    console.log(tempStockQty)
+    console.log(index)
+    console.log('user is ' + user.id)
+    console.log('itemId is ' + tempStockQty[index].itemid)
+    orderDataRef.where('item.itemid', '==', tempStockQty[index].itemid)
+        .where("user", "==", user.id)
+        .get()
+        .then((querySnapshot) => {
+            if (querySnapshot.docs.length !== 0) {
+                querySnapshot.forEach((doc) => {
+                    // doc.data() is never undefined for query doc snapshots
+                    console.log(doc.id, " => ", doc.data());
+
+                    orderDataRef.doc(doc.id).update({
+                        'orderQty': Math.round(parseInt(doc.data().orderQty) + parseInt(tempStockQty[index].counter)),
+                        'totalPrice': Math.round(doc.data().totalPrice + Math.round(parseInt(tempStockQty[index].counter) * parseInt(doc.data().item.itemAmount)))
+                    })
+
+                    stockDataRef.where('itemid', '==', tempStockQty[index].itemid).get()
+                        .then((querySnapshot) => {
+                            if (querySnapshot.docs.length !== 0) {
+                                querySnapshot.forEach((doc) => {
+                                    // doc.data() is never undefined for query doc snapshots
+                                    console.log(doc.id, " => ", doc.data());
+
+                                    stockDataRef.doc(doc.id).update({
+                                        'itemQty': Math.round(parseInt(doc.data().itemQty) - parseInt(tempStockQty[index].counter)),
+                                    })
+
+                                    alert('Successful! Thanks')
+                                    setLoading(false)
+                                    props.navigation.navigate('Cart')
+                                })
+                            }
+                        })
+
+                })
+
+            }
+            else {
+                orderDataRef.add(data)
+                    .then(() => {
+
+                        stockDataRef.where('itemid', '==', tempStockQty[index].itemid).get()
+                            .then((querySnapshot) => {
+                                if (querySnapshot.docs.length !== 0) {
+                                    querySnapshot.forEach((doc) => {
+                                        // doc.data() is never undefined for query doc snapshots
+                                        console.log(doc.id, " => ", doc.data());
+
+                                        stockDataRef.doc(doc.id).update({
+                                            'itemQty': Math.round(parseInt(doc.data().itemQty) - parseInt(tempStockQty[index].counter)),
+                                        })
+                                        alert('Successful! Thanks')
+                                        setLoading(false)
+                                        props.navigation.navigate('Cart')
+                                    })
+                                }
+                            })
+
+                    })
+                    .catch((err) => {
+                        setError(err.message)
+                        setLoading(false)
+                        console.log(err)
+                    })
+            }
+        })
+        .catch((err) => {
+            setError(err.message)
+            setLoading(false)
+            console.log(err)
+        })
+}
+
+export const updateStock = (dispatch, item, tempStockQty, index, setLoading) => {
+    console.log(item.itemid)
+    console.log(tempStockQty)
+    console.log(index)
+    stockDataRef.where('itemid', '==', tempStockQty[index].itemid)
+        .get().then((querySnapshot) => {
+            if (querySnapshot.docs.length !== 0) {
+                querySnapshot.forEach((doc) => {
+                    // doc.data() is never undefined for query doc snapshots
+                    console.log(doc.id, " => ", doc.data());
+
+                    stockDataRef.doc(doc.id).update({
+                        'itemQty': tempStockQty[index].itemQty + tempStockQty[index].counter
+                    })
+                    setLoading(false)
+                })
+            }
+            // else {
+            //     alert('You have zero order! Please make an order.')
+            //     dispatch({
+            //         type: 'FETCH_ORDER_DATA',
+            //         payload: tempDataHolder
+            //     })
+            //     navigation.navigate('Ordering')
+            // }
+        }).catch(err =>
+            console.log(err)
+        )
+
 
 }

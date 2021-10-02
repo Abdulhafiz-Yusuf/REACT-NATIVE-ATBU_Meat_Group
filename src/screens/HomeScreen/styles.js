@@ -38,7 +38,7 @@ export default StyleSheet.create({
         color: '#2e2e2d',
         fontStyle: 'italic',
         fontWeight: "bold",
-        marginBottom: 30
+        marginBottom: 30,
     },
 })
 

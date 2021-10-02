@@ -3,6 +3,7 @@ import { StyleSheet } from 'react-native';
 export default StyleSheet.create({
     container: {
         flex: 1,
+        borderWidth: 1,
         alignItems: 'center',
     },
     title: {
@@ -15,11 +16,15 @@ export default StyleSheet.create({
         margin: 15
     },
     input: {
-        color: '#000',
-        paddingRight: 15,
-        fontSize: 16,
-        lineHeight: 23,
-        flex: 2
+        height: 48,
+        borderRadius: 5,
+        overflow: 'hidden',
+        backgroundColor: 'white',
+        marginTop: 10,
+        marginBottom: 10,
+        marginLeft: 30,
+        marginRight: 30,
+        paddingLeft: 16
     },
     inputQty: {
         color: '#000',
@@ -117,17 +122,6 @@ export default StyleSheet.create({
         fontStyle: 'italic',
         margin: 1
     },
-    input: {
-        height: 48,
-        borderRadius: 5,
-        overflow: 'hidden',
-        backgroundColor: 'white',
-        marginTop: 10,
-        marginBottom: 10,
-        marginLeft: 30,
-        marginRight: 30,
-        paddingLeft: 16
-    },
     PickerInput: {
         flexDirection: 'row',
         justifyContent: 'space-evenly',
@@ -137,12 +131,18 @@ export default StyleSheet.create({
         overflow: 'hidden',
         backgroundColor: 'white',
         marginTop: 10,
-        marginLeft: 30,
+        marginBottom: 10,
+        marginLeft: 45,
         marginRight: 30,
-        paddingLeft: 10,
+        paddingLeft: 16,
         borderWidth: 1
 
     },
+    itemContainer: {
+        margin: 10,
+        // alignSelf: 'center'
+    },
+
 
 
 })

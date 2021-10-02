@@ -42,8 +42,16 @@ const CardComponent = ({ data, index, navigation }) => {
             <Card style={{ margin: 0 }} >
                 <View style={{ flexDirection: 'row', paddingRight: 10, }} >
                     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-                        <Avatar.Image style={{ margin: 5 }} size={120} source={require('../../../asset/beef.jpeg')} />
-                        <Text style={styles.price}>NGN{data.cost}</Text>
+                        <Avatar.Image style={{ margin: 5 }} size={120}
+                            source={data.item.ItemName === 'Division' ? require('../../../asset/beef.jpeg') :
+                                data.item.ItemName === 'Head' ? require('../../../asset/head.jpeg') :
+                                    data.item.ItemName === 'Tail' ? require('../../../asset/cowtail.jpeg') :
+                                        data.item.ItemName === 'Leg' && require('../../../asset/cowleg.jpeg')
+                            }
+                        // source={item.ItemImage}
+                        // source={{ uri: `../../../asset/${logo}` }}
+                        />
+                        <Text style={styles.price}>NGN{data.totalPrice}</Text>
                     </View>
 
                     <View style={{ flexDirection: 'row', }}>
@@ -55,14 +63,14 @@ const CardComponent = ({ data, index, navigation }) => {
                             />
                             <ListItem
                                 style={styles.listItem}
-                                title={qty}
+                                title={data.orderQty}
                                 description='Quanity'
                             />
 
 
                             <ListItem
                                 style={styles.listItem}
-                                title={data.cpoint}
+                                title={data.collectionPoint}
                                 description='Collection Point'
                             />
                         </View>

@@ -14,7 +14,7 @@ export default function App() {
     <PaperProvider>
       <UserContextProvider>
         <NavigationContainer>
-          <Stack.Navigator initialRouteName='Ordering'
+          <Stack.Navigator initialRouteName='Home'
             screenOptions={{            // headerStyle: {            //   backgroundColor: 'papayawhip', justifyContent            // },
               title: 'ATBU Meat Group'
             }} >
@@ -22,7 +22,6 @@ export default function App() {
             <Stack.Screen name="Cart" component={CartScreen} />
             <Stack.Screen name="Home" component={HomeScreen} />
             <Stack.Screen name="Login" component={LoginScreen} />
-            {/* <Stack.Screen name="OrderDetail" component={OrderDetailScreen} /> */}
             <Stack.Screen name="Ordering" component={OrderingScreen} />
             <Stack.Screen name="Profile" component={ProfileScreen} />
             <Stack.Screen name="Signup" component={SignupScreen} />

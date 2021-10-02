@@ -83,7 +83,8 @@ export default StyleSheet.create({
     userName: {
         color: "#788eec",
         fontWeight: "bold",
-        fontSize: 20,
+        fontSize: 25,
+        marginTop: 15
 
     },
     userContainer: {

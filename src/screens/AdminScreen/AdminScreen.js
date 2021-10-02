@@ -26,9 +26,9 @@ export default function CartScreen({ navigation }) {
 
 
   useEffect(() => {
-    fectchAllOrderData(dispatch);
+    fectchAllOrderData(dispatch, navigation);
     const willFocusSubscription = navigation.addListener('focus', () => {
-      fectchAllOrderData(dispatch);
+      fectchAllOrderData(dispatch, navigation);
     });
 
     return willFocusSubscription;

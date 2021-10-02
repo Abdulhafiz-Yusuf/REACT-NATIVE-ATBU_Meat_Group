@@ -1,7 +1,9 @@
+
 import React, { useState, useEffect, useContext } from 'react'
-import { Image, Text, TouchableOpacity, View } from 'react-native'
+import { Image, Text, TouchableOpacity, BackHandler, View } from 'react-native'
 import styles from './styles';
 import { Icon, withBadge } from 'react-native-elements'
+import { TextInput } from 'react-native-paper'
 import { QuantityData, MonthData, CollectionPointData, } from './Data'
 import { Picker } from '@react-native-picker/picker'
 import LoadScreen from '../../components/LoadScreen';
@@ -9,20 +11,32 @@ import 'react-native-get-random-values'
 import { nanoid } from 'nanoid'
 import { userStore } from '../../AppStore/UserStore';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { useFocusEffect } from '@react-navigation/native';
+import { addToCart, fetchAPIforOrderScreen, Logout } from '../../AppStore/actions/UserActions'
+import firebase from '../../firebase/FirebaseConfig';
+import { PricingCard, Tab, TabView } from 'react-native-elements';
+import OrderCard from '../../components/OrderCard'
+// import OrderCard from './OrderCard'
 
-import { addToCart, fetchAPIforOrderScreen } from '../../AppStore/actions/UserActions'
 
 
 export default function OrderingScreen(props) {
-
+    const [index, setIndex] = useState()
     const { state, dispatch } = useContext(userStore)
-    const user = state.user
-    // console.log(state)
-    // const user = {
-    //     email: "yushaf01@gmail.com",
-    //     fullName: "Abdulhafiz Yusuf",
-    //     id: "dobTvCESHOTYQHZIeQfgh7lQVyi1"
-    // }
+    let user = props.route.params.user
+    const [Cow, setCow] = useState({
+        DivAmout: 5000,
+        NoOfDiv: '',
+        HAmount: 4000,
+        NoOfHead: '',
+        LAmount: ["5000", "2000", '4000'],
+        NoOfLegs: '',
+        NoOfTail: '',
+        TAmount: ''
+
+    })
+
+
     const [Quantity, setQuantity] = useState(1)
     const [Month, setMonth] = useState('January')
     const [CollectionPoint, setCollectionPoint] = useState('ATBU Farm')
@@ -36,41 +50,70 @@ export default function OrderingScreen(props) {
     const onGotoScreen = (screen) => {
         props.navigation.navigate(screen)
     };
-    const onGotoHome = () => {
-        props.navigation.reset({
-            index: 0,
-            routes: [{ name: 'Home' }],
-        })
+
+
+    const onLogout = () => {
+        firebase.auth().signOut().then(() => {
+            dispatch({
+                type: 'LOGOUT',
+            })
+
+        }).catch((error) => {
+            // An error happened.
+        });
     }
 
+
+    useFocusEffect(
+        React.useCallback(() => {
+            const onBackPress = () => {
+                props.navigation.reset({
+                    index: 0,
+                    routes: [{ name: 'Home' }],
+                })
+            }
+            BackHandler.addEventListener('hardwareBackPress', onBackPress);
+            return () =>
+                BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+        }, [])
+    );
+
     useEffect(() => {
+
         fetchAPIforOrderScreen(dispatch, user, setCost, setTotalInCart)
+
         const willFocusSubscription = props.navigation.addListener('focus', () => {
             fetchAPIforOrderScreen(dispatch, user, setCost, setTotalInCart)
         });
+
         return willFocusSubscription;
+
     }, [])
 
-    const onAddtoCartPress = () => {
+    const onAddtoCartPress = (item, totalPrice) => {
         setLoading(true)
         //const timestamp = Firebase.firestore.FieldValue.serverTimestamp();
         const data = {
             user: user.id,
             oid: nanoid(5),
-            qty: Quantity,
-            month: Month,
-            cpoint: CollectionPoint,
-            cost: Math.round((Quantity * cost)),
+            item: item,
+            // month: Month,
+            // cpoint: CollectionPoint,
+            // cost: Math.round(parseInt(Quantity) * cost),
+            totalPrice: totalPrice,
             pstatus: 'pending'
             //  date: timestamp,
         };
+
         addToCart(dispatch, data, setLoading, setError, props)
     }
 
     const renderButton = () => {
+
         if (Loading) {
             return <LoadScreen size='small' text={'Adding to cart...'} />
         }
+
         if (!Loading) {
             return (
                 <View style={styles.btncontainer} >
@@ -96,78 +139,323 @@ export default function OrderingScreen(props) {
 
 
     return (
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1, flexDirection: 'column' }}>
 
             {
-                // !cost || totalInCart === null ?
-                //     <LoadScreen />
-                //     :
-                <View style={styles.container}>
-                    <KeyboardAwareScrollView
-                        style={{ flex: 1, width: '100%' }}
-                        keyboardShouldPersistTaps="always">
-                        <Image
-                            style={styles.logo}
-                            source={require('../../../asset/logo.jpg')}
-                        />
+                !cost || totalInCart === null ?
+                    <LoadScreen />
+                    :
+                    <View style={styles.container}>
+                        <KeyboardAwareScrollView
+                            style={{ flex: 1, width: '100%' }}
+                            keyboardShouldPersistTaps="always">
+                            {/* <Image
+                                style={styles.logo}
+                                source={require('../../../asset/logo.jpg')}
+                            /> */}
 
-                        <View style={styles.userContainer}>
-                            <Text style={styles.userName}>Hi! {user.fullName}</Text>
-                            <Text style={styles.userInstruction}> Please fill in all field below to place and order</Text>
-                        </View>
+                            <View style={styles.userContainer}>
+                                {/* <Text style={styles.userName}>Hi! {user.fullName}</Text> */}
+                                <Text style={styles.userInstruction}> Please fill in all field below to place and order</Text>
+                            </View>
 
-                        <View>
+                            <View>
+                                {/* 
+                                <TextInput
+                                    style={styles.input}
+                                    label={`Number of Divisions (N${Cow.DivAmout} per Divsion)`}
+                                    outlineColor="#blue"
+                                    onChangeText={(text) => setCow({ ...Cow, NoOfDiv: text })}
+                                    value={Cow.NoOfDiv}
+                                    mode="outlined"
+                                    keyboardType='numeric'
+                                />
+                                <TextInput
+                                    style={styles.input}
+                                    label={`Number of Head (N${Cow.HAmount} per Head)`}
+                                    outlineColor="#blue"
+                                    onChangeText={(text) => setCow({ ...Cow, Divisions: text })}
+                                    value={Cow.Divisions}
+                                    mode="outlined"
+                                    keyboardType='numeric'
+                                />
+
+                                <TextInput
+                                    style={styles.input}
+                                    label={`Number of Tail (N${Cow.TAmount} per Tail)`}
+                                    outlineColor="#blue"
+                                    onChangeText={(text) => setCow({ ...Cow, Tail: text })}
+                                    value={Cow.Divisions}
+                                    mode="outlined"
+                                    keyboardType='numeric'
+                                /> */}
+
+                                <OrderCard
+                                    btnActionHandler={(item, totalPrice) => onAddtoCartPress(item, totalPrice)}
+                                    page='user'
+                                />
 
 
-                            <View style={styles.inputContainer}>
-                                <Text style={styles.label}>Quantity</Text>
-                                <View style={{ flex: 2, flexDirection: 'row' }}>
+
+                                {/* <Tab value={index} onChange={setIndex}>
+                                    <Tab.Item title="recent" />
+                                    <Tab.Item title="favorite" />
+                                    <Tab.Item title="cart" />
+                                </Tab>
+
+                                <TabView value={index} onChange={setIndex} >
+                                    <TabView.Item style={{ backgroundColor: 'red', width: '100%' }}>
+                                        <Text h1>Recent</Text>
+                                    </TabView.Item>
+                                    <TabView.Item style={{ backgroundColor: 'blue', width: '100%' }}>
+                                        <Text h1>Favorite</Text>
+                                    </TabView.Item>
+                                    <TabView.Item style={{ backgroundColor: 'green', width: '100%' }}>
+                                        <Text h1>Cart</Text>
+                                    </TabView.Item>
+                                </TabView> */}
+
+
+
+
+                                {/* DIVISIONS
+                                <View style={{
+                                    marginLeft: 35,
+                                    marginRight: 30
+                                }}>
+                                    <View
+                                        // style={{ flex: 1, flexDirection: 'row', width: '95%', marginBottom: 10, marginTop: 10 }}
+                                        style={styles.PickerInput}
+                                    >
+
+                                        <Text
+                                            style={{ fontWeight: 'bold', fontSize: 14, flex: 1, color: 'blue', alignSelf: 'center', }}
+                                        >Number of Division </Text>
+                                        <View style={{ flex: 1, flexDirection: 'row', borderWidth: 1, backgroundColor: '#87CEEB' }}>
+                                            <Picker
+                                                style={{
+                                                    color: '#000',
+                                                    fontSize: 14,
+                                                    lineHeight: 23,
+                                                    flex: 1,
+
+                                                    // flex: 1
+                                                }}
+                                                selectedValue={Cow.NoOfDiv}
+                                                onValueChange={(itemValue, itemIndex) => {
+
+                                                    setCow({ ...Cow, NoOfDiv: text })
+                                                }}>
+                                                {QuantityData.map((quantity, index) => {
+                                                    return (
+                                                        <Picker.Item key={index} label={quantity} value={quantity} />
+                                                    )
+                                                })}
+                                            </Picker>
+
+                                        </View>
+
+                                    </View>
+
+                                    <Text style={{ fontWeight: 'bold', textAlign: 'right', fontSize: 16, color: 'red', margin: 0 }}>
+                                        N{Cow.HAmount} per Cow Division
+                                    </Text>
+                                </View> */}
+
+
+
+
+                                {/* HEAD */}
+                                {/* <View style={{
+                                    marginLeft: 35,
+                                    marginRight: 30
+                                }}>
+                                    <View
+                                        // style={{ flex: 1, flexDirection: 'row', width: '95%', marginBottom: 10, marginTop: 10 }}
+                                        style={styles.PickerInput}
+                                    >
+
+                                        <Text
+                                            style={{ fontWeight: 'bold', fontSize: 14, flex: 1, color: 'blue', alignSelf: 'center', }}
+                                        >Quantity of Cow Head </Text>
+                                        <View style={{ flex: 1, flexDirection: 'row', borderWidth: 1, backgroundColor: '#87CEEB' }}>
+                                            <Picker
+                                                style={{
+                                                    color: '#000',
+                                                    fontSize: 14,
+                                                    lineHeight: 23,
+                                                    flex: 1,
+
+                                                    // flex: 1
+                                                }}
+                                                selectedValue={Cow.NoOfHead}
+                                                onValueChange={(itemValue, itemIndex) => {
+
+                                                    setCow({ ...Cow, NoOfHead: text })
+                                                }}>
+                                                {QuantityData.map((quantity, index) => {
+                                                    return (
+                                                        <Picker.Item key={index} label={quantity} value={quantity} />
+                                                    )
+                                                })}
+                                            </Picker>
+
+                                        </View>
+
+                                    </View>
+
+                                    <Text style={{ fontWeight: 'bold', textAlign: 'right', fontSize: 16, color: 'red', margin: 0 }}>N{Cow.HAmount} per Cow Head</Text>
+                                </View> */}
+
+
+
+
+
+                                {/* COW TAIL */}
+                                {/* <View style={{
+                                    marginLeft: 35,
+                                    marginRight: 30
+                                }}>
+                                    <View
+                                        // style={{ flex: 1, flexDirection: 'row', width: '95%', marginBottom: 10, marginTop: 10 }}
+                                        style={styles.PickerInput}
+                                    >
+
+                                        <Text
+                                            style={{ fontWeight: 'bold', fontSize: 14, flex: 1, color: 'blue', alignSelf: 'center', }}
+                                        >Quantity of Cow Tail </Text>
+                                        <View style={{ flex: 1, flexDirection: 'row', borderWidth: 1, backgroundColor: '#87CEEB' }}>
+                                            <Picker
+                                                style={{
+                                                    color: '#000',
+                                                    fontSize: 14,
+                                                    lineHeight: 23,
+                                                    flex: 1,
+
+                                                    // flex: 1
+                                                }}
+                                                selectedValue={Cow.NoOfTail}
+                                                onValueChange={(itemValue, itemIndex) => {
+
+                                                    setCow({ ...Cow, NoOfTail: text })
+                                                }}>
+                                                {QuantityData.map((quantity, index) => {
+                                                    return (
+                                                        <Picker.Item key={index} label={quantity} value={quantity} />
+                                                    )
+                                                })}
+                                            </Picker>
+
+                                        </View>
+
+                                    </View>
+
+                                    <Text style={{ fontWeight: 'bold', textAlign: 'right', fontSize: 16, color: 'red', margin: 0 }}>
+                                        N{Cow.TAmount} per Cow Tail</Text>
+                                </View> */}
+
+
+                                {/* COW LEGS */}
+                                {/* <View style={{
+                                    marginLeft: 35,
+                                    marginRight: 30
+                                }}>
+                                    <View
+                                        // style={{ flex: 1, flexDirection: 'row', width: '95%', marginBottom: 10, marginTop: 10 }}
+                                        style={styles.PickerInput}
+                                    >
+
+                                        <Text
+                                            style={{ fontWeight: 'bold', fontSize: 14, flex: 1, color: 'blue', alignSelf: 'center', }}
+                                        >Quantity of Cow Leg </Text>
+                                        <View style={{ flex: 1, flexDirection: 'row', borderWidth: 1, backgroundColor: '#87CEEB' }}>
+                                            <Picker
+                                                style={{
+                                                    color: '#000',
+                                                    fontSize: 14,
+                                                    lineHeight: 23,
+                                                    flex: 1,
+
+                                                    // flex: 1
+                                                }}
+                                                selectedValue={Quantity}
+                                                onValueChange={(itemValue, itemIndex) => {
+
+                                                    setCow({ ...Cow, Le: text })
+                                                }}>
+                                                {QuantityData.map((quantity, index) => {
+                                                    return (
+                                                        <Picker.Item key={index} label={quantity} value={quantity} />
+                                                    )
+                                                })}
+                                            </Picker>
+
+                                        </View>
+
+                                    </View>
+
+                                    <Text style={{ fontWeight: 'bold', textAlign: 'right', fontSize: 16, color: 'red', margin: 0 }}>N{Cow.HAmount} per Cow Head</Text>
+                                </View> */}
+
+
+
+
+                                {/* <View style={{ flex: 1, flexDirection: 'row', width: '95%', marginBottom: 10, marginTop: 10 }}>
+                                    <Text style={{ fontWeight: 'bold', flex: 1, fontSize: 16, marginLeft: 35 }}>Leg</Text>
+                                    <View style={{ flex: 1, flexDirection: 'row' }}>
+                                        <Picker
+                                            style={{
+                                                color: '#000',
+                                                fontSize: 16,
+                                                lineHeight: 23,
+                                                flex: 1
+                                            }}
+                                            selectedValue={Quantity}
+                                            onValueChange={(itemValue, itemIndex) => {
+
+                                                setQuantity(itemValue)
+                                            }}>
+                                            {QuantityData.map((quantity, index) => {
+                                                return (
+                                                    <Picker.Item key={index} label={quantity} value={quantity} />
+                                                )
+                                            })}
+                                        </Picker>
+
+                                    </View>
+
+                                </View>
+                                <View style={{ marginBottom: 10, marginTop: 10, flex: 1, flexDirection: 'row', width: '95%' }}>
+                                    <Text style={{ fontWeight: 'bold', flex: 1, fontSize: 16, marginLeft: 35 }}>Month</Text>
                                     <Picker
-                                        placeholder='Quantity'
-                                        mode='dropdown'
-
                                         style={{
                                             color: '#000',
                                             fontSize: 16,
                                             lineHeight: 23,
                                             flex: 1
                                         }}
-                                        selectedValue={Quantity}
-                                        onValueChange={(itemValue, itemIndex) => {
-
-                                            setQuantity(itemValue)
-                                        }}>
-                                        {QuantityData.map((quantity, index) => {
+                                        selectedValue={Month}
+                                        onValueChange={(itemValue, itemIndex) =>
+                                            setMonth(itemValue)
+                                        }>
+                                        {MonthData.map((month, index) => {
                                             return (
-                                                <Picker.Item key={index} label={quantity} value={quantity} />
+                                                <Picker.Item key={index} label={month} value={month} />
                                             )
                                         })}
                                     </Picker>
-                                    <Text style={styles.labelKG}>KG</Text>
                                 </View>
 
-                            </View>
-                            <View style={styles.inputContainer}>
-                                <Text style={styles.label}>Month</Text>
-                                <Picker
-                                    style={styles.input}
-                                    selectedValue={Month}
-                                    onValueChange={(itemValue, itemIndex) =>
-                                        setMonth(itemValue)
-                                    }>
-                                    {MonthData.map((month, index) => {
-                                        return (
-                                            <Picker.Item key={index} label={month} value={month} />
-                                        )
-                                    })}
-                                </Picker>
-                            </View>
-                            <View style={styles.inputContainer}>
-                                <Text style={styles.label}>Collection Point</Text>
 
-                                <View style={{ flex: 2 }}>
+                                <View style={{ marginBottom: 10, marginTop: 10, flex: 1, flexDirection: 'row', width: '95%' }}>
+                                    <Text style={{ fontWeight: 'bold', flex: 1, fontSize: 16, marginLeft: 35 }}>Collection Point</Text>
                                     <Picker
-                                        style={styles.input}
+                                        style={{
+                                            color: '#000',
+                                            fontSize: 16,
+                                            lineHeight: 23,
+                                            flex: 1
+                                        }}
                                         selectedValue={CollectionPoint}
                                         onValueChange={(itemValue, itemIndex) =>
                                             setCollectionPoint(itemValue)
@@ -178,48 +466,47 @@ export default function OrderingScreen(props) {
                                             )
                                         })}
                                     </Picker>
-                                    <Text style={styles.labelKG}>ATBU Farm (Free)</Text>
-                                    <Text style={styles.labelKG}>Delivery (N100)</Text>
-                                </View>
+
+                                </View> */}
+                                {/* <View style={{ flex: 1, flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'flex-end' }}>
+                                    <Text style={{ width: '45%', fontSize: 14, fontWeight: 'bold', }}>ATBU Farm (Free)</Text>
+                                    <Text style={{ width: '45%', fontSize: 14, fontWeight: 'bold' }}>Delivery (N100)</Text>
+                                </View> */}
                             </View>
-                        </View>
+                            <Text style={styles.errorText}>
+                                {error}
+                            </Text>
 
 
+                            {renderButton()}
 
-                        <Text style={styles.errorText}>
-                            {error}
-                        </Text>
-
-
-                        {renderButton()}
-
-                        <View style={styles.iconContainer} >
-                            <Icon
-                                raised
-                                name='user'
-                                type='font-awesome'
-                                onPress={() => onGotoScreen('Profile')}
-                            />
+                            <View style={styles.iconContainer} >
+                                <Icon
+                                    raised
+                                    name='user'
+                                    type='font-awesome'
+                                    onPress={() => onGotoScreen('Profile')}
+                                />
 
 
-                            < BadgedIcon
-                                raised
-                                name='shopping-cart'
-                                type='font-awesome'
-                                onPress={() => onGotoScreen('Cart')}
-                            />
+                                < BadgedIcon
+                                    raised
+                                    name='shopping-cart'
+                                    type='font-awesome'
+                                    onPress={() => onGotoScreen('Cart')}
+                                />
 
-                            <Icon
-                                raised
-                                name='logout'
-                                type='material-design'
-                                onPress={() => onGotoHome()}
-                            />
+                                <Icon
+                                    raised
+                                    name='logout'
+                                    type='material-design'
+                                    onPress={onLogout}
+                                />
 
-                        </ View>
+                            </ View>
 
-                    </KeyboardAwareScrollView>
-                </View >
+                        </KeyboardAwareScrollView>
+                    </View >
 
             }
 

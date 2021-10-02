@@ -1,28 +1,23 @@
-import React, { useContext, useState } from 'react'
-import { Image, Text, TouchableOpacity, View } from 'react-native'
-import { TextInput } from 'react-native-paper'
+import React, { useContext, useState } from 'react';
+import { Image, Text, TouchableOpacity, View } from 'react-native';
+import { TextInput } from 'react-native-paper';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import styles from './styles';
-import { login } from '../../AppStore/actions/UserActions'
+import { PasswordResetAction } from '../../AppStore/actions/UserActions';
 import LoadScreen from '../../components/LoadScreen';
 import { userStore } from '../../AppStore/UserStore';
 
-export default function LoginScreen({ navigation }) {
+export default function PasswordReset({ navigation }) {
     const { state, dispatch } = useContext(userStore)
     const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
     const [Loading, setLoading] = useState(false)
     const [error, setError] = useState('')
-
     const onFooterLinkPress = () => {
         navigation.navigate('Signup')
     }
-    const onForgotPasswrodPress = () => {
-        navigation.navigate('Password')
-    }
 
-    const onLoginPress = () => {
-        if (email === '' || password === '') {
+    const onResetPassword = () => {
+        if (email === '') {
             setError('All fields must be filled!')
         }
         else {
@@ -30,20 +25,19 @@ export default function LoginScreen({ navigation }) {
             setError('')
             //login() from ContextAPI Action
             setError('')
-            login(dispatch, email, password, setError, setLoading, navigation)
+            PasswordResetAction(email, setError, setLoading, navigation)
         }
     }
-
     const renderButton = () => {
         if (Loading) {
-            return (<LoadScreen size='small' text='Loging in....' />)
+            return (<LoadScreen size='small' text='Sending password reset mail....' />)
         }
         else {
             return (
                 <TouchableOpacity
                     style={styles.button}
-                    onPress={() => onLoginPress()}>
-                    <Text style={styles.buttonTitle}>Log in</Text>
+                    onPress={() => onResetPassword()}>
+                    <Text style={styles.buttonTitle}>Reset Password</Text>
                 </TouchableOpacity>
             )
         }
@@ -68,19 +62,6 @@ export default function LoginScreen({ navigation }) {
                     mode="outlined"
                 />
 
-                <TextInput
-                    style={styles.input}
-                    outlineColor="#blue"
-                    secureTextEntry
-                    label='Password'
-                    onChangeText={(text) => setPassword(text)}
-                    value={password}
-                    mode="outlined"
-                />
-                <Text onPress={onForgotPasswrodPress} style={styles.forgotpasswordText}>
-                    Forgot Password
-                </Text>
-
                 <Text style={styles.errorText}>
                     {error}
                 </Text>
@@ -96,3 +77,6 @@ export default function LoginScreen({ navigation }) {
         </View>
     )
 }
+
+
+

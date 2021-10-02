@@ -2,15 +2,10 @@ import { StyleSheet } from 'react-native';
 
 export default StyleSheet.create({
     paymentStatusImage: {
-        height: 60,
-        width: 60,
-        marginBottom: 2,
+        height: 80,
+        width: 80,
+        marginBottom: 3,
         alignSelf: 'center'
-    },
-    listItem:
-    {
-        margin: 0,
-        padding: 0
     },
     price: {
         color: "red",
@@ -52,30 +47,18 @@ export default StyleSheet.create({
     paymentStatusContainer: {
         width: '100%',
         marginRight: 2,
+        borderWidth: 1,
         alignItems: 'center',
         justifyContent: 'center',
-    },
-    Icon: {
-        paddingRight: 1,
-        margin: 0
     },
     DisapproveIconText: {
         color: 'red',
         fontSize: 14,
         textAlign: 'center'
     },
-    IconText: {
-        color: 'green',
-        fontSize: 14,
-        textAlign: 'center'
-    },
 
-    paymentStatusImage: {
-        height: 60,
-        width: 60,
-        marginBottom: 2,
-        alignSelf: 'center'
-    },
+
+
     listItem:
     {
         margin: 0,
@@ -101,12 +84,6 @@ export default StyleSheet.create({
         borderColor: 'green'
     },
     PayNowIconContainer: {
-        width: '100%',
-        marginRight: 2,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    paymentStatusContainer: {
         width: '100%',
         marginRight: 2,
         alignItems: 'center',

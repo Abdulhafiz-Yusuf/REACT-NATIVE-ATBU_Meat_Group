@@ -41,16 +41,16 @@ function ProfileScreen() {
             />
 
             <ListItem
-                title={user.phone}
+                title={'+234 ' + user.phone}
                 description="Phone"
                 icon="phone" />
 
 
-            <List.Item
+            <ListItem
                 title={user.email}
                 description="Email"
-                icon="email" />
-
+                icon='message'
+            />
 
         </View >
     )
